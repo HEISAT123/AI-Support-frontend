@@ -1,0 +1,66 @@
+.heading { margin-bottom: 19px; }
+.hero { padding: 0; overflow: hidden; }
+.cover {
+  height: 110px;
+  background: radial-gradient(ellipse at 10% -40%, #bce496, transparent 67%), linear-gradient(115deg, #98cb61, #508e32 70%, #38793b);
+}
+.identity {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 15px;
+  padding: 0 22px 22px;
+  margin-top: -43px;
+  position: relative;
+  overflow-wrap: anywhere;
+  h2 { font-size: 23px; letter-spacing: -.035em; }
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  background: linear-gradient(135deg, #a1d06d, #47882b);
+  color: white;
+  border: 4px solid var(--panel);
+  border-radius: 50%;
+  font-size: 28px;
+  font-weight: 800;
+}
+.form { display: grid; gap: 13px; margin-top: 12px; }
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 12px 0 0;
+  > div { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 17px; padding: 12px 14px; min-height: 80px; }
+  dt { order: 2; color: var(--muted); font-size: 12px; }
+  dd { margin: 0; font-size: 23px; font-weight: 800; letter-spacing: -.045em; }
+}
+.unavailable { margin-top: 12px; }
+.settings { margin-top: 13px; }
+.setting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 0;
+  + .setting { border-top: 1px solid var(--line); }
+  small { display: block; color: var(--muted); font-size: 12px; }
+}
+.switch {
+  appearance: none; flex: 0 0 44px; position: relative; width: 44px; height: 26px; margin: 0;
+  border-radius: 99px; background: var(--line); cursor: pointer; transition: background .2s;
+  &::before {
+    position: absolute; content: ''; width: 20px; height: 20px; top: 3px; left: 3px;
+    background: #fff; box-shadow: 0 1px 3px #0004; border-radius: 50%; transition: transform .2s;
+  }
+  &:checked { background: var(--accent); }
+  &:checked::before { transform: translateX(18px); }
+}
+.resetText { margin-bottom: 14px; }
+@media (max-width: 600px) {
+  .identity { grid-template-columns: auto 1fr; gap: 9px; margin-top: -31px; padding: 0 15px 15px; button { grid-column: 1 / -1; } h2 { font-size: 19px; } }
+  .avatar { width: 65px; height: 65px; font-size: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .switch, .switch::before { transition: none; } }

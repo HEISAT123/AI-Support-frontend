@@ -1,4 +1,6 @@
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
+import AccountPage from '../components/pages/account'
+import AnalyticsPage from '../components/pages/analytics'
 import ArticlePage from '../components/pages/article'
 import KnowledgePage from '../components/pages/knowledge'
 import HomePage from '../components/pages/home'
@@ -20,6 +22,8 @@ export default function App() {
             <Route path="knowledge" element={<KnowledgePage />} />
             <Route path="knowledge/:articleId" element={<ArticlePage />} />
             <Route path="requests/:requestId/articles/:articleId" element={<ArticlePage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="account" element={<AccountPage />} />
             <Route path="*" element={<section className={ui.panel}><h1>Страница не найдена</h1><Link to="/">На главную</Link></section>} />
           </Route>
         </Routes>
