@@ -21,15 +21,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [pendingRatings, setPendingRatings] = useState<ReadonlySet<string>>(() => new Set())
 
   useEffect(() => {
-    if (import.meta.env.MODE !== 'demo') return
-    let active = true
-    void import('../api/demoApi').then(({ demoRecent }) => {
-      if (active) setRecent((items) => [...items, ...demoRecent.filter((entry) => !items.some(({ requestId }) => requestId === entry.requestId))])
-    })
-    return () => { active = false }
-  }, [])
-
-  useEffect(() => {
     document.documentElement.dataset.theme = profile.dark ? 'dark' : 'light'
   }, [profile.dark])
 

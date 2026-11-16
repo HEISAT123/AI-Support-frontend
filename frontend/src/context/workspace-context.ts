@@ -11,8 +11,8 @@ export interface Profile {
 }
 
 export const defaultProfile: Profile = {
-  name: import.meta.env.MODE === 'demo' ? 'Анна Петрова' : '',
-  email: import.meta.env.MODE === 'demo' ? 'anna.petrova@company.ru' : '',
+  name: '',
+  email: '',
   shift: '09:00–18:00, пн–пт',
   notifications: false,
   sound: false,

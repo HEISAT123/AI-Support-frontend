@@ -31,7 +31,6 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
-        {import.meta.env.MODE === 'demo' && <p className={styles.demo}>Демонстрационный режим</p>}
       </aside>
       <main className={styles.main}><Outlet /></main>
     </div>

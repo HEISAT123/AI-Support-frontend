@@ -33,12 +33,7 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
   const init = { method, headers, body: body === undefined ? undefined : JSON.stringify(body), signal }
   let response: Response
   try {
-    if (import.meta.env.MODE === 'demo') {
-      const { demoRequest } = await import('../api/demoApi')
-      response = await demoRequest(path, init)
-    } else {
-      response = await fetch(baseUrl + path, init)
-    }
+    response = await fetch(baseUrl + path, init)
   } catch (error) {
     if (signal?.aborted) throw error
     throw new ApiError('Не удалось связаться с сервером. Проверьте подключение и повторите попытку.', 0)

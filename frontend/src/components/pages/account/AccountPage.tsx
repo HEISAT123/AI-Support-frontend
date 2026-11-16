@@ -8,11 +8,7 @@ import { Status } from '../../widgets/ui/Status'
 import ui from '../../widgets/ui/ui.module.scss'
 import styles from './AccountPage.module.scss'
 
-const demo = import.meta.env.MODE === 'demo'
-const stats = [
-  { label: 'Обработано', value: '312' }, { label: 'Оценка клиентов', value: '4,8' },
-  { label: 'Решено с 1 раза', value: '92%' }, { label: 'Среднее время', value: '1,8 мин' },
-]
+const metricLabels = ['Обработано', 'Оценка клиентов', 'Решено с 1 раза', 'Среднее время']
 const settings = [
   { field: 'notifications', label: 'Уведомления', description: 'Когда рекомендации готовы в фоновой вкладке' },
   { field: 'sound', label: 'Звук', description: 'Сигнал, когда рекомендации готовы' },
@@ -95,7 +91,7 @@ export default function AccountPage() {
             <div className={styles.cover} />
             <div className={styles.identity}>
               <span className={styles.avatar} aria-hidden="true">{initials(profile.name) || 'AI'}</span>
-              <div><h2>{profile.name || 'Оператор'}</h2><p className={ui.muted}>Оператор{demo ? ' · Линия 1' : ''}</p></div>
+              <div><h2>{profile.name || 'Оператор'}</h2><p className={ui.muted}>Оператор</p></div>
               <button type="button" className={ui.outline} onClick={() => setConfirm(true)}>Сбросить профиль</button>
             </div>
           </section>
@@ -114,8 +110,8 @@ export default function AccountPage() {
         <aside className={ui.stack}>
           <section className={ui.panel}>
             <h2>Моя работа за месяц</h2>
-            <dl className={styles.metrics}>{stats.map(({ label, value }) => <div key={label}><dt>{label}</dt><dd>{demo ? value : '—'}</dd></div>)}</dl>
-            {!demo && <p className={`${ui.muted} ${styles.unavailable}`}>Персональные показатели пока недоступны.</p>}
+            <dl className={styles.metrics}>{metricLabels.map((label) => <div key={label}><dt>{label}</dt><dd>—</dd></div>)}</dl>
+            <p className={`${ui.muted} ${styles.unavailable}`}>Персональные показатели пока недоступны.</p>
           </section>
           <section className={ui.panel}>
             <h2>Настройки</h2>
