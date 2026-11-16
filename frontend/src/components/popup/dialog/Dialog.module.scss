@@ -1,0 +1,18 @@
+.dialog {
+  width: min(580px, calc(100% - 28px));
+  max-height: calc(100dvh - 36px);
+  overscroll-behavior: contain;
+  padding: 24px;
+  border: 1px solid var(--green-line);
+  border-radius: 19px;
+  box-shadow: 0 24px 68px #16251e4f;
+  background: var(--panel);
+  color: var(--text);
+  &::backdrop { background: #16251e63; backdrop-filter: blur(4px); }
+}
+.header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 15px; }
+.header h2 { font-size: 20px; }
+.close { width: 34px; height: 34px; border: 0; border-radius: 9px; background: var(--surface); color: var(--text); font-size: 23px; line-height: 1; }
+.form { display: grid; gap: 13px; }
+.form textarea { resize: vertical; min-height: 130px; }
+.form footer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }

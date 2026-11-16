@@ -1,0 +1,40 @@
+.page { display: grid; gap: 6px; }
+.filters {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(150px, .52fr) minmax(130px, .35fr) auto;
+  gap: 12px;
+  align-items: end;
+  padding-top: 12px;
+}
+.tableHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 14px 0 6px; }
+.import { background: transparent; border: 0; color: var(--green); font-weight: 800; padding: 2px; &:hover { text-decoration: underline; } }
+.message { margin-block: 8px; }
+.tableWrap { overflow-x: auto; border-radius: 11px; }
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+  thead th {
+    background: var(--surface);
+    color: var(--text);
+    font-size: 12px;
+    border-block: 1px solid var(--accent);
+    &:first-child { border-left: 1px solid var(--accent); border-radius: 10px 0 0 10px; }
+    &:last-child { border-right: 1px solid var(--accent); border-radius: 0 10px 10px 0; }
+  }
+  th, td { padding: 10px; }
+  tbody :is(th, td) { border-bottom: 1px solid var(--line); min-height: 50px; }
+  td { color: var(--muted); }
+  tbody th a { color: var(--text); font-weight: 800; }
+  tbody tr:hover { background: var(--surface); }
+  tbody tr:last-child :is(th, td) { border-bottom: 0; }
+  :is(td, th):nth-child(n+3) { white-space: nowrap; }
+}
+@media (max-width: 1100px) { .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) {
+  .filters { padding-top: 0; }
+  .filters label:first-child { grid-column: 1 / -1; }
+  .filters button { grid-column: 1 / -1; }
+  .table { min-width: 590px; }
+}

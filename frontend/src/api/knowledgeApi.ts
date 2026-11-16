@@ -13,7 +13,10 @@ export async function getArticles(q = '', category = '', signal?: AbortSignal): 
 
 export async function findArticle(id: string, title = '', signal?: AbortSignal) {
   const result = await getArticles(title, '', signal)
-  return result.items.find((article) => article.id === id)
+  const found = result.items.find((article) => article.id === id)
+  if (found || !title) return found
+  const all = await getArticles('', '', signal)
+  return all.items.find((article) => article.id === id)
 }
 
 export function saveArticle(article: ArticleInput, apiKey: string, id?: string) {
