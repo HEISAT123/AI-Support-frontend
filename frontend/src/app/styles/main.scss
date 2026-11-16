@@ -1,0 +1,77 @@
+:root {
+  color-scheme: light;
+  font-family: 'Manrope Variable', Manrope, sans-serif;
+  font-size: 13.5px;
+  line-height: 1.55;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--page);
+  --page: #e9f2e3;
+  --shell: #f7faf5e0;
+  --sidebar: #ffffff3d;
+  --panel: #fff;
+  --surface: #f1f6ed;
+  --surface-hover: #eaf3e1;
+  --text: #1b2a1d;
+  --muted: #607365;
+  --line: #e2eadb;
+  --green: #43821e;
+  --accent: #68a333;
+  --green-soft: #e2f0d7;
+  --green-line: #cfe4bc;
+  --danger: #a9322e;
+  --amber: #945e0b;
+  --shadow: 0 6px 12px -7px #33572429;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --page: #152018;
+  --shell: #1c2920f5;
+  --sidebar: #f0ffe305;
+  --panel: #25352a;
+  --surface: #2b3e31;
+  --surface-hover: #334b37;
+  --text: #edf7e7;
+  --muted: #b7cab9;
+  --line: #405745;
+  --green: #afe58a;
+  --accent: #83c15b;
+  --green-soft: #354f32;
+  --green-line: #52724a;
+  --danger: #ffa79f;
+  --amber: #ffcf7c;
+  --shadow: 0 6px 12px -7px #0008;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 95% -8%, #96cd644d, transparent 37%),
+    radial-gradient(ellipse at -5% 104%, #83bb6738, transparent 40%),
+    linear-gradient(125deg, transparent, #96b8781a);
+}
+a { color: var(--green); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .62; }
+:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: 26px; line-height: 1.2; font-weight: 800; letter-spacing: -.035em; }
+h2 { font-size: 15px; line-height: 1.55; font-weight: 800; }
+h3 { font-size: 13.5px; font-weight: 800; }
+img { vertical-align: middle; }
+::selection { background: var(--green-soft); }
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
