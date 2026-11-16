@@ -6,7 +6,8 @@ import { useAnalysis } from '../../../hooks/useAnalysis'
 import { useDocumentTitle } from '../../../hooks/useDocumentTitle'
 import { useResource } from '../../../hooks/useResource'
 import { ApiError } from '../../../lib/apiClient'
-import { categoryLabel, displayDate, displayNumber, scorePercent } from '../../../lib/format'
+import { categoryLabel, displayDate, displayNumber } from '../../../lib/format'
+import { rankRecommendations } from '../../../lib/recommendations'
 import type { Article, Recommendation } from '../../../types/support'
 import ArticleEditorPopup from '../../popup/article-editor-popup'
 import { CopyButton } from '../../widgets/ui/CopyButton'
@@ -26,7 +27,7 @@ function Related({ article, recommendations, requestId }: { article: Article; re
   const result = useResource(load)
   const similar = result.status === 'success' ? result.data.items.filter(({ id, isActive }) => id !== article.id && isActive) : []
   const fromRequest = recommendations.filter(({ articleId }) => articleId !== article.id).map((item) => ({
-    id: item.articleId, title: item.title, category: item.category, percent: scorePercent(item.relevance), requestId,
+    id: item.articleId, title: item.title, category: item.category, percent: Math.round(item.relevance), requestId,
   }))
   const items = [...fromRequest, ...similar.filter(({ id }) => !fromRequest.some((item) => item.id === id)).map((item) => ({
     id: item.id, title: item.title, category: item.category, percent: null, requestId: undefined,
@@ -110,7 +111,7 @@ function ArticleContent({ id, title, requestId, recommendations = [] }: { id: st
 
 function RecommendationArticle({ id, title, requestId }: { id: string; title: string; requestId: string }) {
   const result = useAnalysis(requestId)
-  if (result.status === 'success') return <ArticleContent id={id} title={title} requestId={requestId} recommendations={result.data.recommendations} />
+  if (result.status === 'success') return <ArticleContent id={id} title={title} requestId={requestId} recommendations={rankRecommendations(result.data)} />
   return <section className={ui.panel}>
     {result.status === 'error' ? <Status error onRetry={result.retry}>{result.message}</Status> : <Status>Загрузка обращения…</Status>}
   </section>

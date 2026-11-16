@@ -34,6 +34,7 @@ export interface Analysis {
   confidence?: number | null
   entities?: string[]
   suggestedReply?: string | null
+  relevanceScale?: 'fraction' | 'percent'
   recommendations: Recommendation[]
   degraded?: boolean
   createdAt?: string

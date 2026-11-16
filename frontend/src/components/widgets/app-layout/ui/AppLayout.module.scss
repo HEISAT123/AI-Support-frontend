@@ -75,7 +75,7 @@
 }
 @media (max-width: 740px) {
   .shell { display: block; width: calc(100% - 20px); margin: 10px auto 20px; min-height: calc(100vh - 30px); border-radius: 20px; }
-  .sidebar { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 10px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .sidebar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 10px; border-right: 0; border-bottom: 1px solid var(--line); }
   .profile { max-width: 190px; min-height: 48px; padding: 6px 8px; }
   .avatar { width: 32px; height: 32px; flex-basis: 32px; }
   .nav { grid-column: 1 / -1; grid-row: 2; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; }
@@ -84,5 +84,7 @@
   .main { padding: 17px 12px 22px; }
 }
 @media (max-width: 360px) {
+  .sidebar { grid-template-columns: minmax(0, 1fr); }
+  .demo { grid-row: 3; text-align: left; }
   .nav a img { display: none; }
 }

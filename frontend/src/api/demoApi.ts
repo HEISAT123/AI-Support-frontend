@@ -1,5 +1,5 @@
 import { dateFromKey, dateKey, moveDay } from '../lib/format'
-import type { Analysis, AnalyticsPoint, AnalyticsSummary, Article, ArticleInput, Recommendation } from '../types/support'
+import type { Analysis, AnalyticsSummary, Article, ArticleInput, Recommendation } from '../types/support'
 
 function mockArticle(n: number, title: string, category: string, body: string, views: number): Article {
   return {
@@ -27,7 +27,14 @@ let articles = [
   mockArticle(7, 'Смена тарифа на мобильную связь', 'services', 'Предложите клиенту доступные тарифы и проверьте дату вступления выбранного тарифа в силу.', 980),
 ]
 
-const requests = new Map<string, Analysis>()
+type DemoAnalysis = Analysis & { createdAt: string }
+
+interface DemoRequest {
+  analysis: DemoAnalysis
+  reopenedAt?: string
+}
+
+const requests = new Map<string, DemoRequest>()
 
 const topics = [
   { pattern: /интернет|651|роутер|подключ|сет[ьи]/i, category: 'technical', matches: [1, 2, 3], entities: ['интернет', 'дача', 'ошибка', '651'] },
@@ -37,7 +44,7 @@ const topics = [
   { pattern: /оборудован|кабел|модем/i, category: 'equipment', matches: [3, 2], entities: ['оборудование'] },
 ]
 
-function analyze(text: string, requestId = crypto.randomUUID(), createdAt = new Date().toISOString()): Analysis {
+function analyze(text: string, requestId = crypto.randomUUID(), createdAt = new Date().toISOString()): DemoAnalysis {
   const topic = topics.find(({ pattern }) => pattern.test(text))
   const recommendations = (topic?.matches ?? []).flatMap<Recommendation>((number, index) => {
     const suffix = String(number).padStart(12, '0')
@@ -52,6 +59,7 @@ function analyze(text: string, requestId = crypto.randomUUID(), createdAt = new 
   return {
     requestId, text, createdAt, category: topic?.category ?? 'other',
     confidence: topic ? 0.93 : null, entities: topic?.entities ?? [],
+    relevanceScale: 'fraction',
     recommendations,
     suggestedReply: top ? `Здравствуйте! По вашему вопросу может помочь статья «${top.title}». ${top.snippet} Если проблема сохранится, напишите нам — подключим специалиста.` : null,
   }
@@ -66,66 +74,135 @@ export const demoRecent = [
   const timestamp = moveDay(new Date(), i === 3 ? -1 : 0)
   timestamp.setHours([14, 12, 10, 16][i], [32, 17, 5, 45][i], 0, 0)
   const result = analyze(entry, `b0000000-0000-4000-8000-00000000000${i + 1}`, timestamp.toISOString())
-  requests.set(result.requestId, result)
+  requests.set(result.requestId, {
+    analysis: result,
+    reopenedAt: i === 2 ? new Date(timestamp.getTime() + 30 * 60 * 1000).toISOString() : undefined,
+  })
   return result
 })
 
-function analytics(query: URLSearchParams): AnalyticsSummary {
-  const from = query.get('from') || dateKey()
-  const to = query.get('to') || from
-  const day = dateFromKey(from)
-  const categories = [
-    { category: 'technical', share: .38 }, { category: 'billing', share: .27 },
-    { category: 'services', share: .2 }, { category: 'auth', share: .15 },
-  ]
-  const filter = query.get('category')
-  const share = filter ? categories.find(({ category }) => category === filter)?.share ?? 0 : 1
-  const series: AnalyticsPoint[] = []
-  const weekly = query.get('groupBy') === 'week'
-  for (let i = 0; i < 370 && dateKey(moveDay(day, i)) <= to; i++) {
-    const current = moveDay(day, i)
-    const step = Math.floor(current.getTime() / 86400000)
-    const isToday = dateKey(current) === dateKey()
-    const point = {
-      date: dateKey(current), totalRequests: Math.round((isToday && from === to ? 24 : 240 + Math.round(48 * Math.sin(step * .39) + 28 * Math.cos(step * 1.37))) * share),
-      fcr: share ? (from === to ? 92 : 82 + step % 16) : null,
-      averageHandlingSeconds: share ? (from === to ? 108 : 40 + step % 18) : null,
-      helpfulRate: share ? 86 + step % 13 : null,
-    }
-    const previous = series.at(-1)
-    if (weekly && i % 7 !== 0 && previous) {
-      const count = i % 7
-      const sum = previous.totalRequests! + point.totalRequests
-      for (const key of ['fcr', 'averageHandlingSeconds', 'helpfulRate'] as const) {
-        previous[key] = point[key] == null ? null : ((previous[key] ?? 0) * count + point[key]) / (count + 1)
-      }
-      previous.totalRequests = sum
-    } else {
-      series.push(point)
-    }
+const demoCategories = [
+  { category: 'technical', share: .38 }, { category: 'billing', share: .27 },
+  { category: 'services', share: .2 }, { category: 'auth', share: .15 },
+]
+
+interface Totals {
+  requests: number
+  resolved: number
+  feedback: number
+  helpful: number
+  handlingSeconds: number
+  handlingSamples: number
+}
+
+const emptyTotals = (): Totals => ({
+  requests: 0, resolved: 0, feedback: 0, helpful: 0, handlingSeconds: 0, handlingSamples: 0,
+})
+
+function addTotals(total: Totals, value: Totals) {
+  total.requests += value.requests
+  total.resolved += value.resolved
+  total.feedback += value.feedback
+  total.helpful += value.helpful
+  total.handlingSeconds += value.handlingSeconds
+  total.handlingSamples += value.handlingSamples
+}
+
+function summarize(total: Totals) {
+  return {
+    totalRequests: total.requests,
+    fcr: total.requests ? total.resolved / total.requests * 100 : null,
+    averageHandlingSeconds: total.handlingSamples ? total.handlingSeconds / total.handlingSamples : null,
+    helpfulRate: total.feedback ? total.helpful / total.feedback * 100 : null,
   }
-  const totalRequests = series.reduce((sum, row) => sum + (row.totalRequests ?? 0), 0)
-  const average = (key: 'fcr' | 'averageHandlingSeconds' | 'helpfulRate') => {
-    return totalRequests ? series.reduce((sum, row) => sum + (row[key] ?? 0) * (row.totalRequests ?? 0), 0) / totalRequests : null
-  }
-  let remaining = totalRequests
-  const byCategory = filter ? [{ category: filter, count: totalRequests }] : categories.map((entry, index) => {
-    const count = index === categories.length - 1 ? remaining : Math.round(totalRequests * entry.share)
-    remaining -= count
-    return { category: entry.category, count }
+}
+
+function historyForDay(day: Date, isToday: boolean) {
+  const step = Math.floor(day.getTime() / 86_400_000)
+  const volume = isToday ? 21 : 240 + Math.round(48 * Math.sin(step * .39) + 28 * Math.cos(step * 1.37))
+  const resolvedRate = isToday ? .92 : (82 + step % 16) / 100
+  const helpfulRate = (86 + step % 13) / 100
+  const averageSeconds = isToday ? 108 : 40 + step % 18
+
+  let allocated = 0
+  return demoCategories.map(({ category, share }, index) => {
+    const count = index === demoCategories.length - 1 ? volume - allocated : Math.round(volume * share)
+    allocated += count
+    const totals: Totals = {
+      requests: count, resolved: Math.round(count * resolvedRate),
+      feedback: count, helpful: Math.round(count * helpfulRate),
+      handlingSeconds: count * averageSeconds, handlingSamples: count,
+    }
+    return { category, totals }
   })
+}
+
+function analytics(query: URLSearchParams): AnalyticsSummary {
+  const today = dateKey()
+  const from = query.get('from') || today
+  const to = query.get('to') || from
+  const start = dateFromKey(from)
+  const category = query.get('category')
+  const weekly = query.get('groupBy') === 'week'
+  const total = emptyTotals()
+  const byCategory = new Map<string, number>()
+  const groups: { date: string; totals: Totals }[] = []
+  const activity = new Map<string, DemoRequest[]>()
+  for (const request of requests.values()) {
+    const day = dateKey(new Date(request.analysis.createdAt))
+    const items = activity.get(day)
+    if (items) items.push(request)
+    else activity.set(day, [request])
+  }
+
+  function record(day: Totals, code: string, totals: Totals) {
+    if (category && category !== code) return
+    addTotals(day, totals)
+    byCategory.set(code, (byCategory.get(code) ?? 0) + totals.requests)
+  }
+
+  for (let i = 0; i < 370; i++) {
+    const date = moveDay(start, i)
+    const day = dateKey(date)
+    if (day > to) break
+    const daily = emptyTotals()
+
+    for (const item of historyForDay(date, day === today)) record(daily, item.category, item.totals)
+    for (const { analysis, reopenedAt } of activity.get(day) ?? []) {
+      const feedback = analysis.recommendations.filter(({ helpful }) => typeof helpful === 'boolean')
+      const helpful = feedback.filter((item) => item.helpful).length
+      const reopenedSameDay = reopenedAt !== undefined && dateKey(new Date(reopenedAt)) === day
+      record(daily, analysis.category ?? 'other', {
+        ...emptyTotals(),
+        requests: 1,
+        resolved: helpful > 0 && !reopenedSameDay ? 1 : 0,
+        feedback: feedback.length,
+        helpful,
+      })
+    }
+
+    addTotals(total, daily)
+    const group = groups.at(-1)
+    if (weekly && i % 7 !== 0 && group) addTotals(group.totals, daily)
+    else groups.push({ date: day, totals: daily })
+  }
+
   const topQueries = [
     { text: 'Сброс пароля', percent: 82, category: 'auth' },
     { text: 'Ошибка 500', percent: 64, category: 'technical' },
     { text: 'Пополнение баланса', percent: 51, category: 'billing' },
     { text: 'Возврат средств', percent: 38, category: 'billing' },
     { text: 'Настройка уведомлений', percent: 27, category: 'services' },
-  ].filter(({ category }) => totalRequests && (!filter || filter === category))
+  ].filter((item) => total.requests && (!category || category === item.category))
   return {
-    totalRequests, fcr: average('fcr'), averageHandlingSeconds: average('averageHandlingSeconds'),
-    helpfulRate: average('helpfulRate'), qualityScore: share ? 4.8 : null, byCategory, series, topQueries,
+    ...summarize(total),
+    qualityScore: total.handlingSamples ? 4.8 : null,
+    byCategory: Array.from(byCategory, ([category, count]) => ({ category, count })),
+    series: groups.map(({ date, totals }) => ({ date, ...summarize(totals) })),
+    topQueries,
   }
 }
+
 
 function fail(status: number, code: string, message: string) {
   return Response.json({ error: { code, message } }, { status })
@@ -143,13 +220,13 @@ export async function demoRequest(path: string, init: RequestInit) {
       return fail(400, 'VALIDATION_ERROR', 'Введите от 3 до 4000 символов.')
     }
     const result = analyze(body.text)
-    requests.set(result.requestId, result)
+    requests.set(result.requestId, { analysis: result })
     return Response.json(result)
   }
 
   const requestMatch = /^\/requests\/([^/]+)(\/feedback)?$/.exec(pathname)
   if (requestMatch) {
-    const result = requests.get(requestMatch[1])
+    const result = requests.get(requestMatch[1])?.analysis
     if (!result) return fail(404, 'NOT_FOUND', 'Обращение не найдено.')
     if (!requestMatch[2] && method === 'GET') return Response.json(result)
     const recommendation = result.recommendations.find(({ articleId }) => articleId === body?.articleId)

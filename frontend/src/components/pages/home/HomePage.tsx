@@ -17,6 +17,8 @@ import { Status } from '../../widgets/ui/Status'
 import ui from '../../widgets/ui/ui.module.scss'
 import styles from './HomePage.module.scss'
 
+const maxRequestLength = 4000
+
 const examples = [
   'Не работает интернет', 'Возврат средств', 'Смена тарифа',
   'Ошибка 651', 'Подключение оборудования',
@@ -93,6 +95,7 @@ export default function HomePage() {
   const [pending, setPending] = useState(false)
   const field = useRef<HTMLTextAreaElement>(null)
   const request = useRef<AbortController | null>(null)
+  const textLength = Array.from(text).length
 
   useEffect(() => () => request.current?.abort(), [])
 
@@ -106,8 +109,7 @@ export default function HomePage() {
     event.preventDefault()
     if (request.current) return
     const value = text.trim()
-    const length = Array.from(value).length
-    if (length < 3 || length > 4000) {
+    if (Array.from(value).length < 3 || textLength > maxRequestLength) {
       setError('Введите от 3 до 4000 символов.')
       setInvalid(true)
       field.current?.focus()
@@ -166,7 +168,7 @@ export default function HomePage() {
           </div>
           {error && <p id="request-error" className={`${ui.error} ${styles.error}`} role="alert">{error}</p>}
           <div className={styles.formFooter}>
-            <span id="request-count" className={Array.from(text).length > 4000 ? ui.error : ui.muted}>{Array.from(text).length}/4000</span>
+            <span id="request-count" className={textLength > maxRequestLength ? ui.error : ui.muted}>{textLength}/{maxRequestLength}</span>
             <button className={ui.primary} type="submit" disabled={pending}>
               <img src={sparkles} alt="" />{pending ? 'Анализируем обращение…' : 'Получить рекомендации'}
             </button>

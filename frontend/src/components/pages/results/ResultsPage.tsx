@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useAnalysis } from '../../../hooks/useAnalysis'
 import { useDocumentTitle } from '../../../hooks/useDocumentTitle'
 import { categoryLabel, scorePercent } from '../../../lib/format'
+import { rankRecommendations } from '../../../lib/recommendations'
 import type { Recommendation } from '../../../types/support'
 import { CopyButton } from '../../widgets/ui/CopyButton'
 import { FeedbackButtons } from '../../widgets/ui/FeedbackButtons'
@@ -10,7 +11,7 @@ import ui from '../../widgets/ui/ui.module.scss'
 import styles from './ResultsPage.module.scss'
 
 function RecommendationCard({ item, requestId, first }: { item: Recommendation; requestId: string; first: boolean }) {
-  const relevance = scorePercent(item.relevance)
+  const relevance = Math.round(item.relevance)
   return (
     <li className={`${styles.card} ${first ? styles.featured : ''}`}>
       <span className={styles.score} data-level={relevance >= 75 ? 'high' : relevance >= 50 ? 'medium' : 'low'} aria-label={`Релевантность ${relevance}%`}>
@@ -39,7 +40,7 @@ export default function ResultsPage() {
   }
 
   const entry = result.data
-  const recommendations = [...entry.recommendations].sort((a, b) => scorePercent(b.relevance) - scorePercent(a.relevance)).slice(0, 10)
+  const recommendations = rankRecommendations(entry).slice(0, 10)
   const confidence = entry.confidence == null ? null : scorePercent(entry.confidence)
   return (
     <>
