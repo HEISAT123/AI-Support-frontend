@@ -62,6 +62,7 @@
   i[data-category='auth'] { background: #3bb66a; }
   i[data-category='services'] { background: #cb4d40; }
 }
+.requestLabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .side { margin-top: -6px; }
 .metrics {
   display: grid;
@@ -84,10 +85,11 @@
 }
 .metricIcon { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; background: var(--green-soft); }
 .metrics + div { margin-top: 10px; }
-@media (max-width: 1050px) { .side { margin-top: 0; } .metrics > div { min-height: 106px; } }
+@media (max-width: 1050px) { .requestLabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.side { margin-top: 0; } .metrics > div { min-height: 106px; } }
 @media (max-width: 580px) {
   .heading { margin-bottom: 0; }
-  .recent a { grid-template-columns: 1fr auto; gap: 4px 8px; time { grid-column: 2; grid-row: 1; font-size: 11px; } }
+  .recent a { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 8px; time { grid-column: 2; grid-row: 1; font-size: 11px; white-space: nowrap; } }
   .recent a > span:nth-child(2) { grid-column: 1 / -1; margin-left: 23px; }
   .formFooter { padding-inline: 12px; }
   .formFooter button { padding-inline: 8px; gap: 4px; font-size: 12px; }

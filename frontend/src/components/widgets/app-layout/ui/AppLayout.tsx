@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useMatch } from 'react-router-dom'
 import homeIcon from '../../../../assets/home.svg'
 import knowledgeIcon from '../../../../assets/knowledge.svg'
 import analyticsIcon from '../../../../assets/analytics.svg'
@@ -14,6 +14,7 @@ const links = [
 
 export function AppLayout() {
   const { profile } = useWorkspace()
+  const requestRoute = useMatch('/requests/*')
 
   return (
     <div className={styles.shell}>
@@ -24,7 +25,7 @@ export function AppLayout() {
         </NavLink>
         <nav className={styles.nav} aria-label="Основная навигация">
           {links.map(({ to, label, icon }) => (
-            <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => isActive ? styles.active : undefined}>
+            <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => isActive || (to === '/' && requestRoute) ? styles.active : undefined}>
               <img src={icon} alt="" />
               <span>{label}</span>
             </NavLink>

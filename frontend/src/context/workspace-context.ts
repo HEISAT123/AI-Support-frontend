@@ -24,6 +24,7 @@ interface Workspace {
   remember: (result: Analysis) => void
   rate: (requestId: string, articleId: string, helpful: boolean) => Promise<void>
   ratings: Record<string, boolean>
+  pendingRatings: ReadonlySet<string>
   profile: Profile
   updateProfile: (profile: Profile) => void
 }

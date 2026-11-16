@@ -52,6 +52,7 @@ body {
     radial-gradient(ellipse at -5% 104%, #83bb6738, transparent 40%),
     linear-gradient(125deg, transparent, #96b8781a);
 }
+#root { display: flow-root; min-height: 100dvh; }
 a { color: var(--green); text-decoration: none; }
 a:hover { text-decoration: underline; }
 button, input, select, textarea { font: inherit; }
@@ -59,9 +60,9 @@ button { cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: .62; }
 :focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
 h1, h2, h3, p { margin: 0; }
-h1 { font-size: 26px; line-height: 1.2; font-weight: 800; letter-spacing: -.035em; }
-h2 { font-size: 15px; line-height: 1.55; font-weight: 800; }
-h3 { font-size: 13.5px; font-weight: 800; }
+h1 { font-size: 26px; line-height: 1.2; font-weight: 700; letter-spacing: -.02em; }
+h2 { font-size: 15px; line-height: 1.55; font-weight: 700; }
+h3 { font-size: 13.5px; font-weight: 700; }
 img { vertical-align: middle; }
 ::selection { background: var(--green-soft); }
 .visuallyHidden {

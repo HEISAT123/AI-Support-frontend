@@ -6,18 +6,17 @@ import styles from './ui.module.scss'
 type Props = { requestId: string; articleId: string; helpful?: boolean | null; short?: boolean }
 
 export function FeedbackButtons({ requestId, articleId, helpful, short = false }: Props) {
-  const { rate, ratings } = useWorkspace()
-  const selected = ratings[`${requestId}:${articleId}`] ?? helpful
-  const [pending, setPending] = useState(false)
+  const { rate, ratings, pendingRatings } = useWorkspace()
+  const key = `${requestId}:${articleId}`
+  const selected = ratings[key] ?? helpful
+  const pending = pendingRatings.has(key)
   const [error, setError] = useState('')
 
   async function submit(value: boolean) {
     if (pending || value === selected) return
-    setPending(true)
     setError('')
     try { await rate(requestId, articleId, value) }
     catch (failure) { setError(errorMessage(failure)) }
-    finally { setPending(false) }
   }
 
   return (

@@ -87,7 +87,7 @@ function analytics(query: URLSearchParams): AnalyticsSummary {
     const step = Math.floor(current.getTime() / 86400000)
     const isToday = dateKey(current) === dateKey()
     const point = {
-      date: dateKey(current), totalRequests: Math.round((isToday && from === to ? 24 : 180 + step % 187) * share),
+      date: dateKey(current), totalRequests: Math.round((isToday && from === to ? 24 : 240 + Math.round(48 * Math.sin(step * .39) + 28 * Math.cos(step * 1.37))) * share),
       fcr: share ? (from === to ? 92 : 82 + step % 16) : null,
       averageHandlingSeconds: share ? (from === to ? 108 : 40 + step % 18) : null,
       helpfulRate: share ? 86 + step % 13 : null,
@@ -139,7 +139,7 @@ export async function demoRequest(path: string, init: RequestInit) {
   const method = init.method ?? 'GET'
   const body = typeof init.body === 'string' ? JSON.parse(init.body) : undefined
   if (pathname === '/requests/analyze' && method === 'POST') {
-    if (typeof body?.text !== 'string' || body.text.length < 3 || body.text.length > 4000) {
+    if (typeof body?.text !== 'string' || Array.from(body.text).length < 3 || Array.from(body.text).length > 4000) {
       return fail(400, 'VALIDATION_ERROR', 'Введите от 3 до 4000 символов.')
     }
     const result = analyze(body.text)

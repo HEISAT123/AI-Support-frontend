@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { sendFeedback } from '../api/requestsApi'
 import { defaultProfile, WorkspaceContext, type Profile } from './workspace-context'
 import type { Analysis } from '../types/support'
@@ -17,6 +17,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [recent, setRecent] = useState<Analysis[]>([])
   const [profile, setProfile] = useState(readProfile)
   const [ratings, setRatings] = useState<Record<string, boolean>>({})
+  const pending = useRef(new Set<string>())
+  const [pendingRatings, setPendingRatings] = useState<ReadonlySet<string>>(() => new Set())
 
   useEffect(() => {
     if (import.meta.env.MODE !== 'demo') return
@@ -41,12 +43,21 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }
 
   async function rate(requestId: string, articleId: string, helpful: boolean) {
-    await sendFeedback(requestId, articleId, helpful)
-    setRatings((previous) => ({ ...previous, [`${requestId}:${articleId}`]: helpful }))
+    const key = `${requestId}:${articleId}`
+    if (pending.current.has(key)) return
+    pending.current.add(key)
+    setPendingRatings(new Set(pending.current))
+    try {
+      await sendFeedback(requestId, articleId, helpful)
+      setRatings((previous) => ({ ...previous, [key]: helpful }))
+    } finally {
+      pending.current.delete(key)
+      setPendingRatings(new Set(pending.current))
+    }
   }
 
   return (
-    <WorkspaceContext.Provider value={{ profile, updateProfile, recent, remember, rate, ratings }}>
+    <WorkspaceContext.Provider value={{ profile, updateProfile, recent, remember, rate, ratings, pendingRatings }}>
       {children}
     </WorkspaceContext.Provider>
   )

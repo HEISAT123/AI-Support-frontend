@@ -71,7 +71,7 @@ export function RecentRequests({ all = false }: { all?: boolean }) {
           {items.map((entry) => (
             <li key={entry.requestId}>
               <Link to={`/requests/${encodeURIComponent(entry.requestId)}`}>
-                <span className={styles.requestTitle}><i data-category={entry.category} />{entry.text}</span>
+                <span className={styles.requestTitle}><i data-category={entry.category} /><span className={styles.requestLabel} title={entry.text}>{entry.text}</span></span>
                 <span className={ui.chip}>{categoryLabel(entry.category)}</span>
                 <time dateTime={entry.createdAt}>{displayRecent(entry.createdAt)}</time>
               </Link>
@@ -117,6 +117,7 @@ export default function HomePage() {
     const controller = new AbortController()
     request.current = controller
     const audio = profile.sound && 'AudioContext' in window ? new AudioContext() : undefined
+    let toneScheduled = false
     if (audio) void audio.resume().catch(() => {})
     setPending(true)
     setError('')
@@ -133,6 +134,7 @@ export default function HomePage() {
         tone.frequency.value = 620
         volume.gain.value = .035
         tone.connect(volume).connect(audio.destination)
+        toneScheduled = true
         tone.start()
         tone.stop(audio.currentTime + .16)
         tone.onended = () => { void audio.close().catch(() => {}) }
@@ -141,8 +143,7 @@ export default function HomePage() {
     } catch (failure) {
       if (!controller.signal.aborted) setError(errorMessage(failure))
     } finally {
-      if (audio && !controller.signal.aborted && audio.state !== 'running') void audio.close().catch(() => {})
-      if (audio?.state === 'running' && (controller.signal.aborted || request.current !== controller)) void audio.close().catch(() => {})
+      if (audio && !toneScheduled) void audio.close().catch(() => {})
       request.current = null
       if (!controller.signal.aborted) setPending(false)
     }

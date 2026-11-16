@@ -39,7 +39,7 @@ function Related({ article, recommendations, requestId }: { article: Article; re
         {items.map((item) => <li key={item.id}>
           <Link to={articleLink(item.id, item.title, item.requestId)}>
             <span><strong>{item.title}</strong><small>{categoryLabel(item.category)}</small></span>
-            {item.percent != null && <span className={`${ui.chip} ${ui.positive}`}>{item.percent}%</span>}
+            {item.percent != null && <span className={styles.relevance} data-medium={item.percent < 75}>{item.percent}%</span>}
           </Link>
         </li>)}
       </ul> : result.status === 'error' ? <Status error onRetry={result.retry}>{result.message}</Status>
